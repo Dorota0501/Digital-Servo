@@ -16,7 +16,7 @@
 void Engine_rotation(uint8_t command);		//ustawia mostek H wg command np: ROTATE_LEFT)
 void rotateTo(uint16_t wartoscZadana);		//przelicza kąt obrotu na impulsy i wywołuje obrot
 											//w momencie osiagniecia zadanej pozycji ztrzymuje silnik
-
+void wyswietl(char dane[]) ;
 
 #endif /* ROTATION_H_ */
 
