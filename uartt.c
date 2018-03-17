@@ -7,12 +7,13 @@
  */
 #include <avr/io.h>
 #include <avr/interrupt.h>
+//#include <util/delay.h>
 #include <stdlib.h>
 #include "uartt.h"
+//#include "Rotation.h"
 
 uint8_t volatile newCommandReceived = 0;
 
-//inicjalizacja UART'a
 void uartInit(void) {
 	UBRRH = (uint8_t) (MYUBBR >> 8);
 	UBRRL = (uint8_t) (MYUBBR);
@@ -34,12 +35,12 @@ uint8_t uartGet() {
 
 uint8_t i = 0;
 
-//przerwanie zakończenia odbierania danych z UART'a
+//przerwanie zakończenia odbierania danych z uarta
 //odpowiada za pobieranie tablicy z UARTa
 ISR(USART_RX_vect) {
 
 	str[i] = UDR;
-	if (str[i] == '\n') {
+	if (str[i] == '\n') { // '\n' znak konca wiersza
 		newCommandReceived = 1;
 		i = 0;
 		return;
