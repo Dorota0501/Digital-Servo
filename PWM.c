@@ -12,28 +12,25 @@
 #include "Rotation.h"
 #include "uartt.h"
 
-extern volatile uint32_t position_counter;	//aktualna pozycja wyznaczana impulsami
+extern volatile uint32_t position_counter;	//aktualna pozycja
 
+void wyswietl(char dane[]) {
+		uint8_t i = 0;
+		while (dane[i]) {
+			uartPut(dane[i]);
+			i++;
+		}
+	}
 void PWM_Init(void) {
-	//pin 14  PB2 OC0A timer 16b
 
-	//fast pwm mode
+	//fast PWM
 	TCCR0A |= (1 << COM0A1) | (1 << WGM01) | (1 << WGM00);
-	TCCR0B |= (1 << CS00) | (1 << CS02);
-	//CS10 prescaler 1024
+	TCCR0B |= (1 << CS00) | (1 << CS02);				//prescaler 1024
 }
 
+//obliczanie długości toru ruchu w impulsach
 uint16_t absolute_movement(int16_t wanted) {
-	/*
-	 * Funkcja zwraca ile impulsów pozostało do osiagnięcia zadanej pozycji
-	 * jednak nie odlicza ich do 0 lecz do (N/2) dlatego zwracana wartość jest
-	 * równa (N/2)-movement
-	 * W ten sposób osiagam odliczanie do 0
-	 * im mniej impulsów zostało do przebycia tym bliżej 0+ sie znajdujemy
-	 *
-	 * INSTRUKCJA WARUNKOWA => OPERATOR TRÓJARGUMENTOWY
-	 * zmienna = (warunek)? (jeżeli prawda) : (jeżeli fałsz);
-	 */
+
 	int16_t movement;
 
 	movement =
@@ -44,37 +41,20 @@ uint16_t absolute_movement(int16_t wanted) {
 
 	return ((N / 2) - movement);
 }
-
+volatile int32_t wynik;
+//ustawianie prędkości na podstawie odległości do przebycia
 void Set_Speed(uint16_t Impulse_Left) {
-	/*
-	 * Ustawienie prędkości obracania się wału silnika, na podstawie funkcji liniowej
-	 * y = (215/1500)*x + 40
-	 */
 
-	uartPut('\n');
-	char wyniczek[10];
-	itoa(Impulse_Left, wyniczek, 10);
-	wyswietl(wyniczek);
-
-	if (Impulse_Left < 200)
+	if (Impulse_Left < 200){
 		OCR0A = 40;
+
+	}
 
 	else if (Impulse_Left > 1500)
 		OCR0A = 0xff;
 
 	else {
-
-		/* x-> Impulse_Left
-		 * y-> PWM (40-255)
-		 *  40 = a*0 +b			_
-		 * 255 = a*1500 +b
-		 *
-		 * 215 = 1500a => a = 215/1500
-		 * b = (215/1500) *1500 -255 => b = 40
-		 *
-		 * y = (215/1500)*x + 40
-		 */
-		OCR0A = ((Impulse_Left * (215 / 1500)) + 40);
+		OCR0A = ((((uint16_t)(Impulse_Left) * (uint16_t)(43)))/260) + 7;
 	}
 
 }
